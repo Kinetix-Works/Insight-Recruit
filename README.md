@@ -28,3 +28,5 @@ Audit Logging: Comprehensive tracking of all PII access for legal compliance.
 Local Environment: Spin up infrastructure using docker-compose up.
 Database Migration: Run ./mvnw flyway:migrate to initialize the RLS-enabled schema.
 Branching Strategy: We follow a main (prod), develop (staging), and feature/* strategy.
+
+# First Commit 
