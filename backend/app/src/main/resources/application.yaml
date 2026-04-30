@@ -14,8 +14,7 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
-
-  insightrecruit:
+insightrecruit:
   security:
     jwt-secret: ${JWT_SECRET}
   ai:
