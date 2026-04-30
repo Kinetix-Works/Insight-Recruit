@@ -9,6 +9,7 @@ dist/
 build/
 target/
 out/
+uploads/
 
 # Dependencies
 node_modules/
