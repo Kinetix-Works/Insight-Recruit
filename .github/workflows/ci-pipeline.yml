@@ -56,10 +56,10 @@ jobs:
         # We inject test environment variables so contextLoads() and Flyway don't crash
         env:
           DB_HOST: localhost
-          DB_PORT: 5432
-          DB_NAME: insightrecruit_test
+          DB_PORT: 5433
+          DB_NAME: insightrecruit
           DB_USER: postgres
-          DB_PASSWORD: testpassword
+          DB_PASSWORD: password
           REDIS_HOST: localhost
           REDIS_PORT: 6379
           JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
