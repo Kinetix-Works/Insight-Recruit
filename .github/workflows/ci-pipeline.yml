@@ -24,8 +24,8 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: testpassword
-          POSTGRES_DB: insightrecruit_test
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: insightrecruit
         ports:
           - 5433:5433
         options: >-
