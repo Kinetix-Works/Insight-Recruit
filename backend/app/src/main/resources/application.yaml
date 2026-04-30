@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: app
+  datasource:
+    url: jdbc:postgresql://localhost:5433/insightrecruit
+    username: postgres
+    password: password
+  flyway:
+    enabled: true

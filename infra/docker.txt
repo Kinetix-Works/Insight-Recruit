@@ -1,0 +1,11 @@
+# Update package list
+sudo apt-get update
+
+# Install Docker and Docker Compose
+sudo apt-get install docker.io docker-compose -y
+
+# Start Docker and enable it to run on boot
+sudo systemctl enable --now docker
+
+# Add your user to the docker group so you don't have to type 'sudo' every time
+sudo usermod -aG docker $USER
