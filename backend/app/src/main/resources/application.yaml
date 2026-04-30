@@ -23,3 +23,6 @@ insightrecruit:
     jwt-secret: ${JWT_SECRET}
   ai:
     llm-api-key: ${LLM_API_KEY}
+    base-url: ${LLM_BASE_URL:https://api.openai.com/v1}
+    model: ${LLM_MODEL:gpt-4o-mini}
+    temperature: ${LLM_TEMPERATURE:0.2}
