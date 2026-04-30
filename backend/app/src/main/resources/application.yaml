@@ -1,9 +1,22 @@
 spring:
   application:
     name: app
+  config:
+    import: optional:file:.env[.properties]
   datasource:
-    url: jdbc:postgresql://localhost:5433/insightrecruit
-    username: postgres
-    password: password
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:insightrecruit}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
   flyway:
     enabled: true
+    baseline-on-migrate: true
+
+  insightrecruit:
+  security:
+    jwt-secret: ${JWT_SECRET}
+  ai:
+    llm-api-key: ${LLM_API_KEY}

@@ -26,3 +26,14 @@ dist-ssr
 
 package-lock.json
 package.json
+
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# OS / IDE Files
+.DS_Store
+.idea/
+*.iml
