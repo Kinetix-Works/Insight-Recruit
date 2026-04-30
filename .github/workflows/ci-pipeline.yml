@@ -1,0 +1,101 @@
+name: InsightRecruit CI Pipeline
+
+# Trigger the pipeline on PRs to main, and any push to dev
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # ==========================================
+  # BACKEND CI JOB
+  # ==========================================
+  backend-build-and-test:
+    name: Backend (Spring Boot)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/app
+
+    # Spin up ephemeral Postgres & Redis containers just for the tests
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: insightrecruit
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Grant execute permission for mvnw
+        run: chmod +x mvnw
+
+      - name: Compile and Run Tests
+        # We inject test environment variables so contextLoads() and Flyway don't crash
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: insightrecruit
+          DB_USER: postgres
+          DB_PASSWORD: password
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
+          LLM_API_KEY: ${{ secrets.TEST_LLM_API_KEY }}
+        run: ./mvnw clean verify
+
+  # ==========================================
+  # FRONTEND CI JOB
+  # ==========================================
+  frontend-build-and-lint:
+    name: Frontend (React/Vite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend/app
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ./frontend/app/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Build Frontend
+        # Vite requires variables prefixed with VITE_ during build time
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_APP_ENV: production
+        run: npm run build
