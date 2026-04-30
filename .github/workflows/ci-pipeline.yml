@@ -27,7 +27,7 @@ jobs:
           POSTGRES_PASSWORD: password
           POSTGRES_DB: insightrecruit
         ports:
-          - 5433:5433
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -56,7 +56,7 @@ jobs:
         # We inject test environment variables so contextLoads() and Flyway don't crash
         env:
           DB_HOST: localhost
-          DB_PORT: 5433
+          DB_PORT: 5432
           DB_NAME: insightrecruit
           DB_USER: postgres
           DB_PASSWORD: password
