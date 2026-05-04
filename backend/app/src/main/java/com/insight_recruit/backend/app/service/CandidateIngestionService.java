@@ -9,6 +9,7 @@ import com.insight_recruit.backend.app.repository.JobRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,20 +20,20 @@ public class CandidateIngestionService {
 
     private final CandidateRepository candidateRepository;
     private final JobRepository jobRepository;
-    private final PdfTextExtractor pdfTextExtractor;
+    private final ResumeUploadTextExtractor resumeUploadTextExtractor;
     private final ResumeStorageService resumeStorageService;
     private final CandidateQueuePublisher queuePublisher;
 
     public CandidateIngestionService(
         CandidateRepository candidateRepository,
         JobRepository jobRepository,
-        PdfTextExtractor pdfTextExtractor,
+        ResumeUploadTextExtractor resumeUploadTextExtractor,
         ResumeStorageService resumeStorageService,
         CandidateQueuePublisher queuePublisher
     ) {
         this.candidateRepository = candidateRepository;
         this.jobRepository = jobRepository;
-        this.pdfTextExtractor = pdfTextExtractor;
+        this.resumeUploadTextExtractor = resumeUploadTextExtractor;
         this.resumeStorageService = resumeStorageService;
         this.queuePublisher = queuePublisher;
     }
@@ -40,17 +41,21 @@ public class CandidateIngestionService {
     @Transactional
     public UUID ingest(UUID jobId, MultipartFile resumeFile) throws IOException {
         if (resumeFile == null || resumeFile.isEmpty()) {
-            throw new IllegalArgumentException("Resume PDF file is required");
+            throw new IllegalArgumentException("Resume file is required");
         }
         String originalName = resumeFile.getOriginalFilename();
-        if (originalName == null || !originalName.toLowerCase().endsWith(".pdf")) {
-            throw new IllegalArgumentException("Only PDF files are supported");
+        if (originalName == null) {
+            throw new IllegalArgumentException("Resume file name is required");
+        }
+        String lowerName = originalName.toLowerCase(Locale.ROOT);
+        if (!lowerName.endsWith(".pdf") && !lowerName.endsWith(".docx")) {
+            throw new IllegalArgumentException("Only PDF and DOCX files are supported");
         }
 
         Job job = jobRepository.findById(jobId)
             .orElseThrow(() -> new EntityNotFoundException("Job not found for id: " + jobId));
 
-        String extractedText = pdfTextExtractor.extract(resumeFile);
+        String extractedText = resumeUploadTextExtractor.extract(resumeFile);
         if (extractedText == null || extractedText.isBlank()) {
             throw new IllegalArgumentException("Uploaded PDF does not contain extractable text");
         }

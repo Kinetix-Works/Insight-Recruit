@@ -29,7 +29,9 @@ public class LocalResumeStorageService implements ResumeStorageService {
         String extension = ".pdf";
         if (originalName != null) {
             String lower = originalName.toLowerCase(Locale.ROOT);
-            if (lower.endsWith(".pdf")) {
+            if (lower.endsWith(".docx")) {
+                extension = ".docx";
+            } else if (lower.endsWith(".pdf")) {
                 extension = ".pdf";
             }
         }
