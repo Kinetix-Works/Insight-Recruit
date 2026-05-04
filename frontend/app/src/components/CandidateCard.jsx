@@ -23,9 +23,16 @@ const STATUS_META = {
   },
 }
 
+function scoreClass(score) {
+  if (score > 80) return 'text-emerald-700 dark:text-emerald-300'
+  if (score >= 50) return 'text-amber-700 dark:text-amber-300'
+  return 'text-red-700 dark:text-red-300'
+}
+
 export function CandidateCard({ candidate }) {
   const meta = STATUS_META[candidate.status] ?? STATUS_META.PENDING
   const Icon = meta.icon
+  const numericScore = candidate.score == null ? null : Number(candidate.score)
 
   return (
     <article className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
@@ -38,9 +45,9 @@ export function CandidateCard({ candidate }) {
           <p className="text-xs text-zinc-500 dark:text-zinc-400">{meta.label}</p>
         </div>
       </div>
-      {candidate.status === 'COMPLETED' && candidate.score != null && (
-        <p className="mt-2 text-left text-sm font-semibold text-violet-700 dark:text-violet-300">
-          AI score: {Number(candidate.score).toFixed(1)}
+      {candidate.status === 'COMPLETED' && numericScore != null && !Number.isNaN(numericScore) && (
+        <p className={`mt-2 text-left text-sm font-semibold ${scoreClass(numericScore)}`}>
+          AI score: {numericScore.toFixed(1)}
         </p>
       )}
     </article>

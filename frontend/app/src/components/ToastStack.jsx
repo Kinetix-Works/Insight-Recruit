@@ -1,11 +1,13 @@
 import { X } from 'lucide-react'
+import { useToasts } from './toast-context'
 
-export function ToastStack({ toasts, onDismiss }) {
+export function ToastStack() {
+  const { toasts, dismissToast } = useToasts()
   if (toasts.length === 0) return null
 
   return (
     <div
-      className="pointer-events-none fixed right-4 top-4 z-50 flex max-w-sm flex-col gap-2"
+      className="pointer-events-none fixed bottom-4 right-4 z-50 flex max-w-sm flex-col gap-2"
       aria-live="polite"
     >
       {toasts.map((t) => (
@@ -21,7 +23,7 @@ export function ToastStack({ toasts, onDismiss }) {
           <button
             type="button"
             className="shrink-0 rounded p-0.5 hover:bg-black/10 dark:hover:bg-white/10"
-            onClick={() => onDismiss(t.id)}
+            onClick={() => dismissToast(t.id)}
             aria-label="Dismiss"
           >
             <X className="h-4 w-4" />

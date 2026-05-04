@@ -1,36 +1,96 @@
-import { useCallback, useRef, useState } from 'react'
-import { Upload } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import axios from 'axios'
+import { Loader2, Upload } from 'lucide-react'
+import { uploadCandidateResume } from '../api/candidates'
+import { useToasts } from './toast-context'
 
 const MAX_BYTES = 5 * 1024 * 1024
+const ACCEPTED_EXTENSIONS = ['.pdf', '.docx']
 
 function validateResumeFile(file) {
   const name = file.name.toLowerCase()
-  if (!name.endsWith('.pdf') && !name.endsWith('.docx')) {
-    return 'Only .pdf and .docx files are allowed.'
+  if (!ACCEPTED_EXTENSIONS.some((extension) => name.endsWith(extension))) {
+    return `${file.name}: only .pdf and .docx files are allowed.`
   }
   if (file.size > MAX_BYTES) {
-    return 'File must be 5MB or smaller.'
+    return `${file.name}: file must be 5MB or smaller.`
   }
   return null
 }
 
-export function FileUploadZone({ disabled, onReject, onUploadFile }) {
+function isCanceledError(error) {
+  return axios.isAxiosError(error) && error.code === 'ERR_CANCELED'
+}
+
+export function FileUploadZone({ jobId, onUploadSuccess }) {
   const inputRef = useRef(null)
+  const controllersRef = useRef(new Set())
+  const uploadSeqRef = useRef(0)
   const [dragOver, setDragOver] = useState(false)
+  const [uploadingFiles, setUploadingFiles] = useState([])
+  const { pushToast } = useToasts()
+
+  const disabled = !jobId?.trim()
+
+  useEffect(() => {
+    return () => {
+      controllersRef.current.forEach((controller) => controller.abort())
+      controllersRef.current.clear()
+    }
+  }, [])
+
+  const uploadLabel = useMemo(() => {
+    const inFlight = uploadingFiles.length
+    if (inFlight === 0) return 'Drag and drop files here, or click to browse'
+    if (inFlight === 1) return `Uploading ${uploadingFiles[0].name}...`
+    return `Uploading ${inFlight} files...`
+  }, [uploadingFiles])
+
+  const uploadFile = useCallback(
+    async (file) => {
+      uploadSeqRef.current += 1
+      const uploadId = `${file.name}-${uploadSeqRef.current}`
+      const controller = new AbortController()
+      controllersRef.current.add(controller)
+      setUploadingFiles((prev) => [...prev, { id: uploadId, name: file.name }])
+      try {
+        await uploadCandidateResume(jobId.trim(), file, controller.signal)
+        pushToast('success', `Queued ${file.name} for screening.`)
+        onUploadSuccess?.()
+      } catch (error) {
+        if (isCanceledError(error)) return
+        const message =
+          axios.isAxiosError(error) && error.response?.data?.message
+            ? String(error.response.data.message)
+            : error instanceof Error
+              ? error.message
+              : 'Upload failed'
+        pushToast('error', `${file.name}: ${message}`)
+      } finally {
+        controllersRef.current.delete(controller)
+        setUploadingFiles((prev) => prev.filter((entry) => entry.id !== uploadId))
+      }
+    },
+    [jobId, onUploadSuccess, pushToast],
+  )
 
   const handleFiles = useCallback(
     async (fileList) => {
+      if (!jobId?.trim()) {
+        pushToast('error', 'Select a job before uploading resumes.')
+        return
+      }
       const files = Array.from(fileList || [])
       for (const file of files) {
         const err = validateResumeFile(file)
         if (err) {
-          onReject(err)
+          pushToast('error', err)
           continue
         }
-        await onUploadFile(file)
+        void uploadFile(file)
       }
     },
-    [onReject, onUploadFile],
+    [jobId, pushToast, uploadFile],
   )
 
   const onDrop = (e) => {
@@ -72,9 +132,13 @@ export function FileUploadZone({ disabled, onReject, onUploadFile }) {
               : 'border-zinc-300 bg-zinc-50 hover:border-violet-400 hover:bg-violet-50/40 dark:border-zinc-600 dark:bg-zinc-900/50 dark:hover:border-violet-500'
         }`}
       >
-        <Upload className="h-8 w-8 text-zinc-500 dark:text-zinc-400" aria-hidden />
+        {uploadingFiles.length > 0 ? (
+          <Loader2 className="h-8 w-8 animate-spin text-violet-500 dark:text-violet-300" aria-hidden />
+        ) : (
+          <Upload className="h-8 w-8 text-zinc-500 dark:text-zinc-400" aria-hidden />
+        )}
         <span className="text-sm text-zinc-600 dark:text-zinc-300">
-          Drag and drop files here, or click to browse
+          {uploadLabel}
         </span>
         <span className="text-xs text-zinc-500">PDF or DOCX · max 5MB each</span>
       </button>
