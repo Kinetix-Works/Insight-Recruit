@@ -1,7 +1,11 @@
 package com.insight_recruit.backend.app.domain.enums;
 
 public enum UserRole {
-    TENANT_ADMIN,
+    HR,
     RECRUITER,
+    DEVELOPER,
+    STUDENT,
+    OTHER,
+    TENANT_ADMIN,
     VIEWER
 }

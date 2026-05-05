@@ -43,10 +43,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = header.substring(7);
             Claims claims = jwtTokenProvider.parseClaims(token);
-            String role = claims.get("role", String.class);
+            if ("refresh".equals(claims.get("tokenType", String.class))) {
+                throw new BadCredentialsException("Refresh token cannot be used as access token");
+            }
+            String role = jwtTokenProvider.extractRole(claims);
             AuthenticatedUser principal = new AuthenticatedUser(
-                UUID.fromString(claims.getSubject()),
-                UUID.fromString(claims.get("tenantId", String.class)),
+                jwtTokenProvider.extractUserId(claims),
+                jwtTokenProvider.extractTenantId(claims),
                 role,
                 claims.get("subscriptionTier", String.class),
                 List.of(new SimpleGrantedAuthority("ROLE_" + role))

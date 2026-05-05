@@ -32,6 +32,8 @@ public class JwtTokenProvider {
             .subject(user.getId().toString())
             .issuedAt(Date.from(now))
             .expiration(Date.from(expiry))
+            .claim("user_id", user.getId().toString())
+            .claim("tenant_id", user.getTenant().getId().toString())
             .claim("tenantId", user.getTenant().getId().toString())
             .claim("role", user.getRole().name())
             .claim("subscriptionTier", subscription.getPlanType().name())
@@ -39,15 +41,17 @@ public class JwtTokenProvider {
             .compact();
     }
 
-    public String generateRefreshToken(User user) {
+    public String generateRefreshToken(User user, String tokenId) {
         Instant now = Instant.now();
         Instant expiry = now.plus(securityProperties.refreshTokenTtlDays(), ChronoUnit.DAYS);
         return Jwts.builder()
             .subject(user.getId().toString())
             .issuedAt(Date.from(now))
             .expiration(Date.from(expiry))
+            .id(tokenId)
             .claim("tokenType", "refresh")
-            .claim("tenantId", user.getTenant().getId().toString())
+            .claim("user_id", user.getId().toString())
+            .claim("tenant_id", user.getTenant().getId().toString())
             .signWith(key)
             .compact();
     }
@@ -62,5 +66,17 @@ public class JwtTokenProvider {
 
     public UUID extractUserId(Claims claims) {
         return UUID.fromString(claims.getSubject());
+    }
+
+    public UUID extractTenantId(Claims claims) {
+        String tenantId = claims.get("tenant_id", String.class);
+        if (tenantId == null) {
+            tenantId = claims.get("tenantId", String.class);
+        }
+        return UUID.fromString(tenantId);
+    }
+
+    public String extractRole(Claims claims) {
+        return claims.get("role", String.class);
     }
 }

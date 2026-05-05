@@ -36,7 +36,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(InvalidOtpException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidOtp(InvalidOtpException exception) {
-        return build(HttpStatus.UNAUTHORIZED, exception.getMessage());
+        return build(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

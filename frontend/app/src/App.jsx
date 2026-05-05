@@ -1,12 +1,17 @@
 import { useMemo, useState } from 'react'
 import { Briefcase } from 'lucide-react'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { FileUploadZone } from './components/FileUploadZone'
 import { KanbanBoard } from './components/KanbanBoard'
 import { ToastStack } from './components/ToastStack'
 import { ToastProvider } from './components/toast-context'
+import { AuthProvider, useAuth } from './components/AuthContext'
+import { Login } from './components/Login'
+import { Signup } from './components/Signup'
 import { JOB_ID_PRESETS } from './constants/jobPresets'
 
-function App() {
+function Dashboard() {
+  const { user, logout } = useAuth()
   const presets = useMemo(() => {
     if (Array.isArray(JOB_ID_PRESETS)) return JOB_ID_PRESETS
     return Object.entries(JOB_ID_PRESETS || {}).map(([label, value]) => ({ label, value }))
@@ -27,6 +32,10 @@ function App() {
           <p className="mt-1 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
             Upload resumes per role and monitor async screening outcomes in real time.
           </p>
+          <div className="mt-3 flex items-center gap-3">
+            <span className="text-xs text-zinc-500">{user?.email}</span>
+            <button className="rounded border px-2 py-1 text-xs" onClick={logout}>Sign out</button>
+          </div>
         </header>
 
         <section className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-950/50 sm:p-6">
@@ -62,6 +71,31 @@ function App() {
         </section>
       </div>
     </ToastProvider>
+  )
+}
+
+function ProtectedRoute({ children }) {
+  const { isAuthenticated } = useAuth()
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  return children
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/"
+          element={(
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          )}
+        />
+      </Routes>
+    </AuthProvider>
   )
 }
 

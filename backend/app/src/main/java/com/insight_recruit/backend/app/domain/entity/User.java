@@ -1,6 +1,7 @@
 package com.insight_recruit.backend.app.domain.entity;
 
 import com.insight_recruit.backend.app.domain.enums.UserRole;
+import com.insight_recruit.backend.app.domain.enums.AuthProvider;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -39,19 +40,29 @@ public class User {
     @JoinColumn(name = "tenant_id", nullable = false)
     private Tenant tenant;
 
-    @Column(name = "email", unique = true, length = 320)
+    @Column(name = "email", unique = true, nullable = false, length = 320)
     private String email;
 
-    @Column(name = "phone_number", unique = true, length = 20)
-    private String phoneNumber;
+    @Column(name = "first_name", nullable = false, length = 100)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false, length = 100)
+    private String lastName;
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "role", nullable = false, columnDefinition = "user_role")
     private UserRole role;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", nullable = false, length = 20)
+    private AuthProvider authProvider;
+
+    @Column(name = "password_hash", length = 255)
+    private String passwordHash;
+
+    @Column(name = "is_email_verified", nullable = false)
+    private boolean isEmailVerified;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
