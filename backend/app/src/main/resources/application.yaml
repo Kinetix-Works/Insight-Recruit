@@ -32,3 +32,13 @@ insightrecruit:
     base-url: ${LLM_BASE_URL:https://api.openai.com/v1}
     model: ${LLM_MODEL:gpt-4o-mini}
     temperature: ${LLM_TEMPERATURE:0.2}
+
+springdoc:
+  swagger-ui:
+    # Custom path to access the Swagger UI
+    path: /swagger-ui.html
+    # Keep the UI state when refreshing the page
+    operationsSorter: method
+  api-docs:
+    # Path to the raw OpenAPI JSON specification
+    path: /v3/api-docs

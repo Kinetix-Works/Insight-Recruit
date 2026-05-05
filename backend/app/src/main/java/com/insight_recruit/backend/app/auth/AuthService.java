@@ -7,7 +7,6 @@ import com.insight_recruit.backend.app.domain.entity.TenantSubscription;
 import com.insight_recruit.backend.app.domain.entity.User;
 import com.insight_recruit.backend.app.domain.enums.PlanType;
 import com.insight_recruit.backend.app.domain.enums.SubscriptionStatus;
-import com.insight_recruit.backend.app.domain.enums.UserRole;
 import com.insight_recruit.backend.app.dto.auth.AuthTokenResponse;
 import com.insight_recruit.backend.app.repository.TenantSubscriptionRepository;
 import com.insight_recruit.backend.app.repository.UserRepository;
