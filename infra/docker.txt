@@ -9,3 +9,6 @@ sudo systemctl enable --now docker
 
 # Add your user to the docker group so you don't have to type 'sudo' every time
 sudo usermod -aG docker $USER
+
+# to start docker images in ubuntu
+docker-compose up -d

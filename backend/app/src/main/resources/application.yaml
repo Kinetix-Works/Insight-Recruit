@@ -21,6 +21,12 @@ insightrecruit:
     upload-dir: ${UPLOAD_DIR:uploads/resumes}
   security:
     jwt-secret: ${JWT_SECRET}
+    access-token-ttl-minutes: ${ACCESS_TOKEN_TTL_MINUTES:15}
+    refresh-token-ttl-days: ${REFRESH_TOKEN_TTL_DAYS:7}
+    otp-ttl-seconds: ${OTP_TTL_SECONDS:300}
+    otp-rate-limit-max: ${OTP_RATE_LIMIT_MAX:3}
+    otp-rate-limit-window-seconds: ${OTP_RATE_LIMIT_WINDOW_SECONDS:300}
+    refresh-cookie-name: ${REFRESH_COOKIE_NAME:insight_refresh_token}
   ai:
     llm-api-key: ${LLM_API_KEY}
     base-url: ${LLM_BASE_URL:https://api.openai.com/v1}

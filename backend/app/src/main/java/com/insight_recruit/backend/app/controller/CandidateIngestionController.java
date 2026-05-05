@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,11 +34,13 @@ public class CandidateIngestionController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'RECRUITER', 'VIEWER')")
     public ResponseEntity<List<CandidateStatusResponse>> listByJob(@RequestParam("jobId") UUID jobId) {
         return ResponseEntity.ok(candidateQueryService.listByJobId(jobId));
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'RECRUITER')")
     public ResponseEntity<UploadCandidateResponse> upload(
         @RequestParam("file") MultipartFile file,
         @RequestParam("jobId") UUID jobId

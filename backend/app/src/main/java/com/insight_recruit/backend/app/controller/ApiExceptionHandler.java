@@ -1,5 +1,7 @@
 package com.insight_recruit.backend.app.controller;
 
+import com.insight_recruit.backend.app.auth.InvalidOtpException;
+import com.insight_recruit.backend.app.auth.OtpRateLimitExceededException;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -25,6 +27,16 @@ public class ApiExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException exception) {
         return build(HttpStatus.BAD_REQUEST, "Invalid request payload");
+    }
+
+    @ExceptionHandler(OtpRateLimitExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleOtpRateLimit(OtpRateLimitExceededException exception) {
+        return build(HttpStatus.TOO_MANY_REQUESTS, exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidOtpException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidOtp(InvalidOtpException exception) {
+        return build(HttpStatus.UNAUTHORIZED, exception.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
